@@ -1,9 +1,13 @@
 package com.example.E_commerce_Backend.entity;
 
+import com.example.E_commerce_Backend.enumeration.OrderStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.time.LocalDateTime;
+import java.util.List;
 
 
 @Entity
@@ -24,5 +28,15 @@ public class Order {
     private Double total_amount;
     private boolean is_paid;
 
+    @Enumerated(EnumType.STRING)
+    private OrderStatus orderStatus;
 
+    private LocalDateTime orderTime;
+
+    @OneToMany(mappedBy = "order",cascade = CascadeType.ALL)
+    private List<OrderItem>orderItems;
+
+
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
+    private List<Payment>payments;
 }
