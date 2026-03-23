@@ -48,10 +48,10 @@ public class PaymentService {
 
 
         Payment payment = new Payment();
-                payment.setOrder(order);
-                payment.setTransactionType(paymentRequest.getTransactionType());
-                payment.setTotalAmount(order.getTotal_amount());
-                payment.setTransactionTime(LocalDateTime.now());
+        payment.setOrder(order);
+        payment.setTransactionType(paymentRequest.getTransactionType());
+        payment.setTotalAmount(order.getTotal_amount());
+        payment.setTransactionTime(LocalDateTime.now());
 
 
         Boolean paymentSuccessful = simulatePaymentProcess(paymentRequest.getTransactionType(), order.getTotal_amount());
@@ -82,6 +82,42 @@ public class PaymentService {
 
     }
 
+
+    public List<PaymentResponse> getPaymentsByOrderId(Long orderId) {
+
+        Order order = orderRepo.findById(orderId).orElseThrow(() -> new NoSuchElementException("No order found with id" + orderId));
+
+        List<Payment> payments = paymentRepo.findByOrderId(orderId);
+
+        List<PaymentResponse> paymentResponses = payments.stream()
+                .map(response -> PaymentResponse.builder()
+                        .paymentStatus(response.getPaymentStatus().name())
+                        .orderId(response.getOrder().getId())
+                        .id(response.getId())
+                        .transactionType(response.getTransactionType().name())
+                        .totalAmount(response.getTotalAmount())
+                        .transactionDate(response.getTransactionTime())
+                        .build()
+                ).toList();
+
+        return paymentResponses;
+    }
+
+
+    public PaymentResponse getPaymentsById(Long id) {
+        Payment payment = paymentRepo.findById(id).orElseThrow(() -> new NoSuchElementException("No Paymen found with id" + id));
+
+        PaymentResponse paymentResponse = PaymentResponse.builder()
+                .paymentStatus(payment.getPaymentStatus().name())
+                .orderId(payment.getOrder().getId())
+                .id(payment.getId())
+                .transactionType(payment.getTransactionType().name())
+                .totalAmount(payment.getTotalAmount())
+                .transactionDate(payment.getTransactionTime())
+                .build();
+
+        return paymentResponse;
+    }
 
     private Boolean simulatePaymentProcess(TransactionType transactionType, Double totalAmount) {
 
